@@ -4,116 +4,47 @@ document.getElementById('newspaperForm').addEventListener('submit', async functi
     const title = document.getElementById('articleTitle').value;
     const content = document.getElementById('articleContent').value;
     const imageFile = document.getElementById('articleImage').files[0];
+    const layoutStyle = document.getElementById('layoutStyle').value;
     
-    // Create canvas
-    const canvas = document.getElementById('newspaperCanvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Set canvas size
-    canvas.width = 800;
-    canvas.height = 1000;
-    
-    // Draw background keep it white
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    // Draw title with wrapping
-    ctx.font = 'bold 32px "Times New Roman"';
-    ctx.fillStyle = '#000';
-    ctx.textAlign = 'center';
-    const titleWords = title.split(' ');
-    let titleLine = '';
-    let titleY = 50;
-    const titleMaxWidth = 700;
-    const titleLineHeight = 40;
-
-    for (let word of titleWords) {
-        const testLine = titleLine + word + ' ';
-        const metrics = ctx.measureText(testLine);
-        
-        if (metrics.width > titleMaxWidth) {
-            ctx.fillText(titleLine, canvas.width / 2, titleY);
-            titleLine = word + ' ';
-            titleY += titleLineHeight;
-        } else {
-            titleLine = testLine;
-        }
-    }
-    ctx.fillText(titleLine, canvas.width / 2, titleY);
-    
-    // Draw content (adjust starting Y position based on title height)
-    ctx.font = '16px "Hind"';
-    ctx.textAlign = 'left';
-    const words = content.split(' ');
-    let line = '';
-    let y = titleY + 50; // Increased spacing after title
-    const maxWidth = 700;
-    const lineHeight = 20;
-    
-    for (let word of words) {
-        const testLine = line + word + ' ';
-        const metrics = ctx.measureText(testLine);
-        
-        if (metrics.width > maxWidth) {
-            ctx.fillText(line, 50, y);
-            line = word + ' ';
-            y += lineHeight;
-        } else {
-            line = testLine;
-        }
-    }
-    ctx.fillText(line, 50, y);
-    
-    // If there's an image, draw it
-    if (imageFile) {
-        const img = new Image();
-        img.onload = function() {
-            // Calculate scaled dimensions while maintaining aspect ratio
-            const maxImgWidth = 400;
-            const maxImgHeight = 300;
-            let imgWidth = img.width;
-            let imgHeight = img.height;
-            
-            if (imgWidth > maxImgWidth) {
-                imgHeight = (maxImgWidth * imgHeight) / imgWidth;
-                imgWidth = maxImgWidth;
-            }
-            if (imgHeight > maxImgHeight) {
-                imgWidth = (maxImgHeight * imgWidth) / imgHeight;
-                imgHeight = maxImgHeight;
-            }
-            
-            // Draw image centered below text
-            const imgX = (canvas.width - imgWidth) / 2;
-            ctx.drawImage(img, imgX, y + 30, imgWidth, imgHeight);
-            
-            // Display the result
-            displayResult();
-        };
-        img.src = URL.createObjectURL(imageFile);
-    } else {
-        displayResult();
-    }
-});
-
-function displayResult() {
-    const canvas = document.getElementById('newspaperCanvas');
+    // Create the newspaper preview
     const previewArea = document.getElementById('previewArea');
+    const newspaperDiv = document.createElement('div');
+    newspaperDiv.className = `newspaper-clip ${layoutStyle}`;
     
-    // Create preview image
-    const img = document.createElement('img');
-    img.src = canvas.toDataURL('image/jpeg');
-    img.className = 'img-fluid';
+    // Add title
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'newspaper-title';
+    titleDiv.textContent = title;
+    newspaperDiv.appendChild(titleDiv);
     
-    // Create download button
-    const downloadBtn = document.createElement('a');
-    downloadBtn.href = canvas.toDataURL('image/jpeg');
-    downloadBtn.download = 'newspaper-clip.jpg';
-    downloadBtn.className = 'btn btn-success mt-3 d-block';
-    downloadBtn.textContent = 'Download Newspaper Clip';
+    // Add image if provided
+    if (imageFile) {
+        const img = document.createElement('img');
+        img.className = 'newspaper-image';
+        img.src = URL.createObjectURL(imageFile);
+        newspaperDiv.appendChild(img);
+    }
     
-    // Clear previous preview and add new elements
+    // Add content
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'newspaper-content';
+    contentDiv.textContent = content;
+    newspaperDiv.appendChild(contentDiv);
+    
+    // Clear previous preview and add new one
     previewArea.innerHTML = '';
-    previewArea.appendChild(img);
+    previewArea.appendChild(newspaperDiv);
+    
+    // Add download button
+    const downloadBtn = document.createElement('button');
+    downloadBtn.className = 'btn btn-success mt-3';
+    downloadBtn.textContent = 'Download as Image';
+    downloadBtn.onclick = async function() {
+        const canvas = await html2canvas(newspaperDiv);
+        const link = document.createElement('a');
+        link.download = 'newspaper-clip.jpg';
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.click();
+    };
     previewArea.appendChild(downloadBtn);
-}
+});

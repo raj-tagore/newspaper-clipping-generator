@@ -3,20 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Newspaper Clip Generator</title>
+    <title>Newspaper Clip Generator - Method 2</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        #newspaperCanvas {
-            display: none;
-        }
         #previewArea {
             max-width: 800px;
             margin-top: 2rem;
         }
+
+        .newspaper-clip {
+            background-color: #fdfbf7;
+            padding: 40px;
+            font-family: "Times New Roman", Times, serif;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: grid;
+            grid-gap: 40px;
+        }
+
+        .newspaper-title {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .newspaper-content {
+            font-size: 16px;
+            line-height: 1.6;
+            text-align: justify;
+            column-count: 3;
+            column-gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        .newspaper-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+
+        /* Layout variations */
+        .newspaper-clip {
+            display: grid;
+            grid-gap: 40px;
+            padding: 40px;
+        }
+
+        /* Two column layout */
+        .layout-2col .newspaper-content {
+            column-count: 2;
+        }
+
+        /* Three column layout */
+        .layout-3col .newspaper-content {
+            column-count: 3;
+        }
+
+        /* Image spanning 2 columns + 1 text column */
+        .layout-2-1 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .layout-2-1 .newspaper-title {
+            grid-column: 1 / -1;
+        }
+
+        .layout-2-1 .newspaper-image {
+            grid-column: 1 / 3;
+            width: 100%;
+            height: auto;
+        }
+
+        .layout-2-1 .newspaper-content {
+            grid-column: 3 / 4;
+            column-count: 1;
+        }
+
+        /* Image spanning 1 column + 2 text columns */
+        .layout-1-2 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .layout-1-2 .newspaper-title {
+            grid-column: 1 / -1;
+        }
+
+        .layout-1-2 .newspaper-image {
+            grid-column: 1 / 2;
+        }
+
+        .layout-1-2 .newspaper-content {
+            grid-column: 2 / 4;
+            column-count: 2;
+        }
+
+        @media (max-width: 768px) {
+            .newspaper-content {
+                column-count: 1 !important;
+            }
+            
+            .layout-2-1, .layout-1-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .layout-2-1 .newspaper-image,
+            .layout-1-2 .newspaper-image,
+            .layout-2-1 .newspaper-content,
+            .layout-1-2 .newspaper-content {
+                grid-column: 1;
+            }
+        }
     </style>
 </head>
 <body class="container mt-5">
-    <h1 class="mb-4">Newspaper Clip Generator</h1>
+    <h1 class="mb-4">Newspaper Clip Generator - 2</h1>
     
     <form id="newspaperForm" class="needs-validation" novalidate>
         <div class="mb-3">
@@ -33,14 +137,24 @@
             <label for="articleImage" class="form-label">Upload Image:</label>
             <input type="file" class="form-control" id="articleImage" name="articleImage" accept="image/*">
         </div>
+
+        <div class="mb-3">
+            <label for="layoutStyle" class="form-label">Layout Style:</label>
+            <select class="form-control" id="layoutStyle" name="layoutStyle" required>
+                <option value="layout-2col">Two Columns (Classic)</option>
+                <option value="layout-3col">Three Columns</option>
+                <option value="layout-2-1">Image (2 cols) + Text (1 col)</option>
+                <option value="layout-1-2">Image (1 col) + Text (2 cols)</option>
+            </select>
+        </div>
         
         <button type="submit" class="btn btn-primary">Generate Newspaper Clip</button>
     </form>
 
     <div id="previewArea" class="mt-4"></div>
-    <canvas id="newspaperCanvas"></canvas>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="newspaper.js"></script>
 </body>
 </html>
